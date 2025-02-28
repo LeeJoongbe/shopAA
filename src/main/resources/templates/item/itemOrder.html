@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout1}"
+>
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${itemDTO.itemNm}">상품 정보</title>
+</head>
+<body>
+  <th:block layout:fragment="content">
+
+    <div class="row">
+      <div class="col-10 offset-1">
+        <div class="row mt-3">
+          <div class="col-6 offset-3">
+            <h2 class="text-center">상품 정보 </h2>
+          </div>
+
+        </div>
+
+          <div class="row row-cols-md-2 row-cols-1">
+
+            <div class="col">
+              <th:block th:each="imgDTO : ${itemDTO.imgDTOList}">
+                <th:block th:if="${imgDTO.repimgYn == 'Y'}">
+                  <img width="100%" th:src="${'/images/' + imgDTO.imgName}">
+                </th:block>
+              </th:block>
+            </div>
+
+            <div class="col">
+              <div class="card border-secondary">
+                <div class="card-body">
+
+                  <div class="row mb-3">
+                    <div class="col">
+                      <th:block th:if="${itemDTO.itemSellStatus.name() == 'SELL'}">
+                        <span class="badge text-bg-success">판매중</span>
+                      </th:block>
+                      <th:block th:if="${itemDTO.itemSellStatus.name() == 'SOLD_OUT'}">
+                        <span class="badge text-bg-danger">품절</span>
+                      </th:block>
+                    </div>
+                  </div>
+
+
+                  <div class="row mb-3">
+                    <div class="col-4">상품명</div>
+                    <div class="col" th:text="${itemDTO.itemNm}"></div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col-4">가격</div>
+                    <div class="col" th:text="${itemDTO.price + '원'}"></div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label for="count" class="col-sm-4 col-form-label">주문수량</label>
+                    <div class="col-8">
+                      <input type="number" min="1" value="1"  name="count" id="count" class="form-control " required>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col text-end">
+                      <h5>결제금액</h5>
+                      <h3 id="totalPrice" th:text="${itemDTO.price + '원'}"></h3>
+                    </div>
+
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col text-end">
+                      <th:block th:if="${itemDTO.itemSellStatus.name() == 'SELL'}">
+                        <button class="btn btn-dark">장바구니 담기</button>
+                        <button class="btn btn-dark order" th:value="${itemDTO.id}" onclick="orders()">주문하기</button>
+                      </th:block>
+                      <th:block th:if="${itemDTO.itemSellStatus.name() == 'SOLD_OUT'}">
+                        <button class="btn btn-dark" disabled>품절</button>
+                      </th:block>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            
+            
+            
+          </div>
+
+          <div class="row">
+            <div class="col">
+
+
+              <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">상세보기</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">리뷰</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact-tab-pane" type="button" role="tab" aria-controls="contact-tab-pane" aria-selected="false">Contact</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="disabled-tab" data-bs-toggle="tab" data-bs-target="#disabled-tab-pane" type="button" role="tab" aria-controls="disabled-tab-pane" aria-selected="false" disabled>Disabled</button>
+                </li>
+              </ul>
+              <div class="tab-content" id="myTabContent">
+                <div  class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0" >
+                  <div class="row mt-3 mb-3">
+                    <div class="col" >
+                      <div class="card border-secondary">
+                        <div class="card-body" th:text="${itemDTO.itemDetail}"></div>
+                      </div>
+                    </div>
+                  </div>
+
+
+                    <th:block th:each="imgDTO  :${itemDTO.imgDTOList}">
+                      <div class="row" th:if="${imgDTO.getRepimgYn() != 'Y'}">
+                        <img width="100%" th:src="${'/images/' + imgDTO.imgName}" th:alt="${imgDTO.oriImgName}">
+                      </div>
+                    </th:block>
+
+                </div>
+                <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0" th:text="${itemDTO.itemDetail}">...</div>
+                <div class="tab-pane fade" id="contact-tab-pane" role="tabpanel" aria-labelledby="contact-tab" tabindex="0">...</div>
+                <div class="tab-pane fade" id="disabled-tab-pane" role="tabpanel" aria-labelledby="disabled-tab" tabindex="0">...</div>
+              </div>
+
+
+            </div>
+          </div>
+          
+
+
+
+      </div>
+    </div>
+
+
+
+    <script th:inline="javascript">
+      let order = $(".order")   //버튼 button
+      let count = $("#count")   //수량 input
+
+
+
+      let price = [[${itemDTO.price}]]
+      $(document).ready(function () {
+
+        $("#count").on("change", function () {
+
+          let count =  $(this).val();
+          let total = count * price;
+
+          $("#totalPrice").text(total+'원')
+
+        })
+
+
+
+      })
+      function orders() {
+        //넘길 객체 생성
+        let paramData = {itemId: order.val() , count: count.val() }
+
+        console.log(paramData)
+        //자바스크립트의 객체 형태가 > json형태로 변환 ("키":값 , "키":값)
+        // let a = JSON.stringify(paramData);
+
+        //데이터를 보낸다.
+        $.ajax({
+          url : "/order",
+          type : "post"   ,
+          contentType : "application/json;   charset=utf-8",
+          data : JSON.stringify(paramData) ,
+          dataType : "json" , //반환타입
+          success : function (data) {
+            console.log(data)
+            alert("주문이 완료되었습니다.")
+            location.href = "/"
+
+
+          },
+          error : function (jqxHR,  status,error) {
+
+            if(jqxHR.status == '401'){
+              alert("로그인후 이용해주세요")
+              alert(jqxHR.responseText)
+              location.href = "/user/login" ; //401 로그인 안되어있을때 로그인페이지로
+            }else {
+              console.log(jqxHR.responseText);//에러에 대한 내용 출력
+            }
+
+
+          }
+
+
+
+
+        })
+
+
+
+      }
+
+
+    </script>
+
+
+
+
+
+
+
+  </th:block>
+
+
+
+
+</body>
+</html>

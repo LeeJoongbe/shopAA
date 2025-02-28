@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout1}"
+>
+<head>
+  <meta charset="UTF-8">
+  <title>회원가입</title>
+</head>
+<body>
+  <th:block layout:fragment="content" >
+
+    <form action="/user/signUp" method="post"  th:object="${membersDTO}">
+      <div class="row mt-3 ">
+        <div class="col-6 offset-3 p-3 shadow">
+          <h1 class="text-center ">회원가입</h1>
+
+
+          <div class="row">
+            <div class="col">
+              <div class="form-floating mb-3">
+                <input type="text" class="form-control" th:field="*{name}" name="name" id="name" required>
+                <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="fieldError"/>
+                <label for="name">Name</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <div class="form-floating mb-3">
+                <input type="email" class="form-control" th:field="*{email}" name="email" id="email" required>
+                <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="fieldError"/>
+                <label for="email">Email address</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <div class="form-floating mb-3">
+                <input type="text" class="form-control" th:field="*{password}" name="password" id="password" required>
+                <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="fieldError"/>
+                <label for="password">Password</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row row-cols-1 align-items-center">
+            <div class="col-md-8 col">
+              <div class="form-floating mb-3">
+                <input type="text" class="form-control" th:field="*{address}" name="address" id="sample5_address" required readonly>
+                <p th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="fieldError"/>
+                <label for="sample5_address">Address</label>
+
+              </div>
+            </div>
+            <div class="col-md-4 col  text-center">
+              <input type="button" class="btn btn-dark " onclick="sample5_execDaumPostcode()" value="주소 검색" >
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col text-center">
+              <button type="submit" class="btn btn-dark">회원가입</button>
+              <button type="button" class="btn btn-dark">로그인</button>
+
+
+            </div>
+
+          </div>
+
+
+
+        </div>
+
+      </div>
+    </form>
+
+
+
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script>
+
+
+      function sample5_execDaumPostcode() {
+        new daum.Postcode({
+          oncomplete: function(data) {
+            var addr = data.address; // 최종 주소 변수
+
+            // 주소 정보를 해당 필드에 넣는다.
+            document.getElementById("sample5_address").value = addr;
+            // 주소로 상세 정보를 검색
+
+          }
+        }).open();
+      }
+    </script>
+
+
+
+  </th:block>
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout1}"
+>
+<head>
+  <meta charset="UTF-8">
+  <title>로그인</title>
+</head>
+<body>
+  <th:block layout:fragment="content">
+
+    <form action="/user/login" method="post">
+      <div class="row mt-3 ">
+        <div class="col-6 offset-3 p-3 shadow">
+          <h1 class="text-center ">로그인</h1>
+          <th:block th:if="${param.error}">
+            <div class="alert alert-danger mt-4">
+                사용자 또는 비밀번호를 확인해주세요
+            </div>
+          </th:block>
+
+
+          <div class="row">
+            <div class="col">
+              <div class="form-floating mb-3">
+                <input type="email" class="form-control" name="email" id="email" required>
+                <label for="email">Email address</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <div class="form-floating mb-3">
+                <input type="text" class="form-control" name="password" id="password" required>
+                <label for="password">Password</label>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="row">
+            <div class="col text-center">
+              <button type="submit" class="btn btn-dark">로그인</button>
+              <button type="button" class="btn btn-dark">회원가입</button>
+
+
+            </div>
+
+          </div>
+
+
+
+        </div>
+
+      </div>
+    </form>
+
+
+    <script th:inline="javascript">
+      let msg = [[${param.error}]]
+      if(msg) {
+        alert("아이디 또는 비밀번호를 확인해주세요")
+      }
+
+    </script>
+
+  </th:block>
+
+
+
+
+</body>
+</html>

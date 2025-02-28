@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout1}"
+>
+<head>
+  <meta charset="UTF-8">
+  <title>아이템 목록</title>
+</head>
+<body>
+  <th:block layout:fragment="content">
+
+    <div class="row">
+      <div class="col-10 offset-1">
+        <h1 class="text-center">아이템 목록</h1>
+
+        <th:block th:if="${responesPageDTO.dtoList == null or responesPageDTO.dtoList.size() ==0}">
+
+          <div class="row">
+            <div class="col-8 offset-2 shadow p-3 border border-info rounded" >
+              <h1>목록이 없습니다.</h1>
+            </div>
+          </div>
+
+        </th:block>
+        <th:block th:if="${responesPageDTO.dtoList != null and responesPageDTO.dtoList.size() != 0}">
+          <table class="table table-hover table-striped">
+            <thead>
+            <tr>
+              <th>#</th>
+              <th>아이템명</th>
+              <th>가격</th>
+              <th>수량</th>
+              <th>판매여부</th>
+              <th>수정날짜</th>
+            </tr>
+            </thead>
+            <tbody>
+            <th:block th:each="itemDTO : ${responesPageDTO.dtoList}">
+              <tr>
+                <td th:text="${itemDTO.id}"></td>
+                <td >
+                  <a th:href="@{/admin/item/read(id=${itemDTO.id})}">
+                    [[${itemDTO.itemNm}]]
+                  </a>
+                </td>
+                <td th:text="${itemDTO.price}"></td>
+                <td th:text="${itemDTO.stockNumber}"></td>
+                <td th:text="${itemDTO.itemSellStatus.name() == 'SELL' ? '판매중' : '품절'}"></td>
+                <td th:text="${#temporals.format(itemDTO.updateTime, 'yyyy-MM-dd')}"></td>
+              </tr>
+            </th:block>
+
+
+
+            </tbody>
+
+          </table>
+        </th:block>
+
+
+      </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+  </th:block>
+
+
+
+
+</body>
+</html>

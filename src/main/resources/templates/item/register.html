@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout1}"
+>
+<head>
+  <meta charset="UTF-8">
+  <title>아이템 등록</title>
+</head>
+<body>
+  <th:block layout:fragment="content">
+
+    <div class="row mt-4">
+      <h1 class="text-center">등록</h1>
+      <div class="col-8 offset-2">
+        <form action="/admin/item/register" method="post" th:object="${itemDTO}" enctype="multipart/form-data">
+
+          <div class="row">
+
+
+            <div class="input-group mb-3">
+              <label class="input-group-text" for="inputGroupSelect01">판매상태</label>
+              <select class="form-select" id="inputGroupSelect01" th:field="*{itemSellStatus}">
+                <option value="SELL">판매중</option>
+                <option value="SOLD_OUT">품절</option>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="row">
+
+            <div class="input-group mb-3">
+              <span class="input-group-text" id="itemNm">상품명</span>
+              <input type="text" class="form-control" th:field="*{itemNm}" placeholder="상품명을 입력해주세요" aria-label="Username" aria-describedby="basic-addon1">
+
+            </div>
+            <p th:if="${#fields.hasErrors('itemNm')}" th:errors="*{itemNm}" class="fieldError"/>
+
+          </div>
+
+          <div class="row">
+            <div class="input-group mb-3">
+
+              <div class="input-group">
+                <span class="input-group-text" id="itemDetail">상품상세설명</span>
+                <textarea class="form-control"  th:field="*{itemDetail}" aria-label="With textarea"></textarea>
+              </div>
+
+            </div>
+            <p th:if="${#fields.hasErrors('itemDetail')}" th:errors="*{itemDetail}" class="fieldError"/>
+
+          </div>
+
+          <div class="row">
+            <div class="input-group mb-3">
+              <span class="input-group-text" id="price">가격</span>
+              <input type="number" min="0" class="form-control"   th:field="*{price}" placeholder="가격을 입력해주세요" aria-label="Username" aria-describedby="basic-addon1" required>
+
+            </div>
+            <p th:if="${#fields.hasErrors('price')}" th:errors="*{price}" class="fieldError"/>
+
+          </div>
+
+          <div class="row">
+            <div class="input-group mb-3">
+              <span class="input-group-text" id="stockNumber">재고수량</span>
+              <input type="number" min="0" class="form-control" th:field="*{stockNumber}" placeholder="재고수량을 입력해주세요" aria-label="Username" aria-describedby="basic-addon1" required>
+              <p th:if="${#fields.hasErrors('stockNumber')}" th:errors="*{stockNumber}" class="fieldError"/>
+
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <div class="row main imgpreview"></div>
+              <div class="row imgd imgpreview"></div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="imgA">
+              <label for="formFileLg1" class="form-label">대표이미지</label>
+              <input name="mainimg" class="form-control form-control-lg mainimg imgInput" id="formFileLg1" type="file">
+            </div>
+
+            <div  class="imgA">
+              <label for="formFileLg2" class="form-label">상세이미지</label>
+              <input name="mutipartFile" class="form-control form-control-lg imgInput" id="formFileLg2" type="file">
+            </div>
+          </div>
+
+
+
+          <button>저장</button>
+
+        </form>
+
+      </div>
+    </div>
+
+
+
+
+  </th:block>
+
+<th:block layout:fragment="script">
+
+  <script th:inline="javascript">
+      $(document).ready(function () {
+        let msg = [[${msg}]]
+        let imgA = $(".imgA")
+
+        imgInputCheck(msg);
+
+        //input type:file에 대한 이벤트
+        imgA.on("change", "input", function () {
+          //파일에 대한 유효성 검사
+          let fileName = $(this).val().split("\\").pop()
+          console.log(fileName)
+
+          let fileExt =  fileName.substring(fileName.lastIndexOf(".") + 1)
+
+          fileExt = fileExt.toLowerCase();
+
+          if(fileExt != "jpg" && fileExt != "jpeg" && fileExt!="gif" && fileExt != "png" &&
+                  fileExt != "bmp" ) {
+            $(this).val("")
+            alert("이미지 파일만 넣어주세요")
+
+            return false;
+          }
+
+          if (this.classList.contains("mainimg")) {
+            //클래스중에 mainimg가 있다면
+            //대표이미지 미리보기
+            // console.log($(this))
+            readURLMain(this)
+          }else {
+            //상세 이미지 미리보기
+            readURL(this)
+          }
+
+        })
+
+        $(".imgpreview").on("click", "button", function () {
+
+          $(this).parent().remove();
+
+
+        })
+        function imgInputCheck(msg) {
+          if(msg) {
+            alert(msg)
+          }
+        }
+        //미리보기 대표
+        function readURLMain( input ) {
+
+          if(input.files && input.files[0]){
+
+            let reader = new FileReader();
+
+            reader.onload = function (e) {
+
+              let inputtag  = document.createElement("input")
+
+              inputtag.type = "file";
+              inputtag.name = "mainimg"
+              //참조값 복사
+              // inputtag.files = input.files;
+
+              const dataTransfer = new DataTransfer()
+              const fileDatas = Array.from(input.files);
+
+              fileDatas.forEach(file => dataTransfer.items.add(file))
+
+              inputtag.files = dataTransfer.files;
+
+              let str1 = `<div class="preview position-relative"><img class="" width="100%" src="${e.target.result}"><button type="button" class="bb position-absolute top-0 end-0 me-2 btn btn-dark">올리지 않기</button></div>`
+
+              $(".main").html(str1)
+              $(".main").find('div:eq(0)').append(inputtag)
+              $(".main").find('input').hide()
+              $(".imgInput").val("")
+
+            }
+            reader.readAsDataURL(input.files[0])
+
+          }
+
+        }  //readURLMain end
+
+        //미리보기 상세
+        function readURL( input ) {
+          if(input.files && input.files[0]){
+
+            let reader = new FileReader();
+
+            reader.onload = function (e) {
+              console.log(e.target.result)
+              let inputtag  = document.createElement("input")
+
+              inputtag.type = "file";
+              inputtag.name = "multipartFile"
+              //참조값 복사
+              // inputtag.files = input.files;
+
+              const dataTransfer = new DataTransfer()
+              const fileDatas = Array.from(input.files);
+
+              fileDatas.forEach(file => dataTransfer.items.add(file))
+
+              inputtag.files = dataTransfer.files;
+
+              let str1 = `<div class="preview col position-relative">
+                              <img width="100%" src="${e.target.result}">
+                              <button type="button"  class="bb position-absolute top-0 end-0  btn btn-dark">올리지 않기</button>
+                          </div>`
+
+              $(".imgd").prepend(str1)
+              $(".imgd").find('div:eq(0)').append(inputtag)
+              $(".imgd").find('input').hide()
+              $(".imgInput").val("")
+
+            }
+            reader.readAsDataURL(input.files[0])
+
+          }
+        }
+        
+
+      })
+  </script>
+
+</th:block>
+
+
+
+</body>
+</html>

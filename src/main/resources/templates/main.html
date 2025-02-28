@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout1}"
+>
+<head>
+  <meta charset="UTF-8">
+  <title>메인페이지</title>
+</head>
+<body>
+  <th:block layout:fragment="content" >
+    <div class="row row-cols-1 mt-3 mb-3" >
+      <img src="/짱구.png"  class="img-fluid" alt="...">
+    </div>
+
+    <div class="row row-cols-1 mt-3 mb-3" >
+      <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="/짱구.png" class="d-block w-100" alt="...">
+          </div>
+          <div class="carousel-item">
+            <img src="/짱구.png" class="d-block w-100" alt="...">
+          </div>
+          <div class="carousel-item">
+            <img src="/짱구.png" class="d-block w-100" alt="...">
+          </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+
+    </div>
+
+    <div class="row row-cols-1" >
+
+      <th:block th:each="itemDTO :${responesPageDTO.dtoList}">
+
+            <div class="col col-md-3 col-sm-4 mb-3">
+              <a th:href="@{/item/read(id=${itemDTO.id})}">
+              <div class="card" >
+
+                <th:block th:if="${itemDTO.imgDTOList != null && !#lists.isEmpty(itemDTO.imgDTOList)}">
+                  <th:block th:each="imgDTO : ${itemDTO.imgDTOList}">
+                    <img th:if="${imgDTO.repimgYn == 'Y'}" th:src="${'/images/' + imgDTO.imgName}" class="card-img-top" alt="...">
+                  </th:block>
+
+                </th:block>
+
+                <div class="card-body">
+                  <h5 class="card-title" th:text="${itemDTO.id}"></h5>
+                  <h5 class="card-title" th:text="${itemDTO.itemNm}"></h5>
+                  <p class="card-text" th:text="${itemDTO.price+'원'}">가격 : 10000</p>
+
+                </div>
+              </div>
+              </a>
+            </div>
+
+      </th:block>
+
+    </div>
+
+
+
+  </th:block>
+
+</body>
+</html>

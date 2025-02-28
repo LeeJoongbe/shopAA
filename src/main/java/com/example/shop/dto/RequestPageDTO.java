@@ -13,6 +13,8 @@ import java.net.URLEncoder;
 @AllArgsConstructor
 public class RequestPageDTO {
 
+    //페이징처리 , 검색처리 를 위한 dto
+
     // 기본적으로 1인데
     // @Builder.Default 사용해서
     // 파라미터 수집 안될 시 1이 디폴트임

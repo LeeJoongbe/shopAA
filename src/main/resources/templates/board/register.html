@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+    <h1>등록</h1>
+    <!--
+        * : 필드
+    -->
+
+
+    <form action="/board/register" method="post" th:object="${boardDTO}" enctype="multipart/form-data">
+
+
+        제목 : <input name="title" th:field="*{title}"> <br>
+        <p th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="fieldError"/>
+
+        내용 : <input name="content" th:field="*{content}"> <br>
+        <p th:if="${#fields.hasErrors('content')}" th:errors="*{content}" class="fieldError"/>
+
+        작성자 : <input name="writer" th:field="*{writer}"> <br>
+        <p th:if="${#fields.hasErrors('writer')}" th:errors="*{writer}" class="fieldError"/>
+
+        파일등록 : <input type="file" name="imgFile">
+
+        <button>저장</button>
+    </form>
+
+</body>
+</html>

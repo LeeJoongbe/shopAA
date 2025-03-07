@@ -1,8 +1,10 @@
 package com.example.shop.service;
 
 import com.example.shop.dto.ImgDTO;
+import com.example.shop.entity.Board;
 import com.example.shop.entity.ImgEntity;
 import com.example.shop.entity.Item;
+import com.example.shop.repository.BoardRepository;
 import com.example.shop.repository.ImgRepository;
 import com.example.shop.repository.ItemRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,13 +24,14 @@ import java.util.stream.Collectors;
 public class ImgService {
 
     private final ItemRepository itemRepository;
+    private final BoardRepository boardRepository;
     private final ImgRepository imgRepository;
     private final FileService fileService;
     private ModelMapper modelMapper = new ModelMapper();
 
 
     //사진db에 저장
-    public ImgDTO register(MultipartFile multipartFile , Long item_id, String repimgYn) throws IOException {
+    public ImgDTO register(MultipartFile multipartFile ,String saveEntityName,   Long item_id, String repimgYn) throws IOException {
 
         //사진물리적으로 저장후 저장한 내용을 바탕으로 dto만들어서 반환
 
@@ -40,9 +43,21 @@ public class ImgService {
 
         ImgEntity imgEntity = modelMapper.map(imgDTO, ImgEntity.class);
 
+
+        Item item = null;
+        Board board = null;
         //참조대상 찾기
-        Item item =
-        itemRepository.findById(item_id).orElseThrow(EntityNotFoundException::new);
+        if(saveEntityName.equals("board")) {
+            board =
+                boardRepository.findById(item_id).orElseThrow(EntityNotFoundException::new);
+            imgEntity.setBoard(board);    //참조대상
+        }else if(saveEntityName.equals("item")) {
+            item =
+                    itemRepository.findById(item_id).orElseThrow(EntityNotFoundException::new);
+            imgEntity.setItem(item);    //참조대상
+        }
+
+
 
         //찾아온 대상이 대표이미지가 있다면
 
@@ -62,24 +77,30 @@ public class ImgService {
         }else {     //대표이미지가 없다면
              //디비에 대표이미지는 현재 없거나 상세이미지를 저장해야 하는경우
             imgEntity.setRepimgYn(repimgYn);
-            imgEntity.setItem(item);    //참조대상
+
 
             imgEntity =
                     imgRepository.save(imgEntity);
 
             imgDTO = modelMapper.map(imgEntity, ImgDTO.class);
-           
-
-
         }
 
         return imgDTO;
     }
 
-    public List<ImgDTO> read(Long item_id){
+    public List<ImgDTO> read(Long item_id , String entityType){
 
-        List<ImgEntity> list =
-        imgRepository.findByItemId(item_id);
+        List<ImgEntity> list =null;
+
+        if(entityType.equals("board")) {
+            list =
+                    imgRepository.findByBoardNum(item_id);
+
+        }else if(entityType.equals("item")) {
+            list =
+            imgRepository.findByItemId(item_id);
+
+        }
 
         List<ImgDTO> imgDTOList =
         list.stream().map( imgEntity -> modelMapper.map(imgEntity, ImgDTO.class) )

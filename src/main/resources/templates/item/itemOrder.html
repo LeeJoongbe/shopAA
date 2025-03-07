@@ -73,7 +73,7 @@
                   <div class="row mb-3">
                     <div class="col text-end">
                       <th:block th:if="${itemDTO.itemSellStatus.name() == 'SELL'}">
-                        <button class="btn btn-dark">장바구니 담기</button>
+                        <button class="btn btn-dark cartAdd" th:value="${itemDTO.id}">장바구니 담기</button>
                         <button class="btn btn-dark order" th:value="${itemDTO.id}" onclick="orders()">주문하기</button>
                       </th:block>
                       <th:block th:if="${itemDTO.itemSellStatus.name() == 'SOLD_OUT'}">
@@ -147,6 +147,7 @@
     <script th:inline="javascript">
       let order = $(".order")   //버튼 button
       let count = $("#count")   //수량 input
+      let cartAdd = $(".cartAdd")//장바구니 담기 버튼
 
 
 
@@ -163,8 +164,47 @@
         })
 
 
+        cartAdd.on("click", function () {
+          cart()
+        })
+
+
 
       })
+      function cart() {
+        //장바구니 버튼을 눌렸을때 작동하는 함수
+        //특정주소로 , 아이템번호와, 수량을 넘겨준다.
+        //넘길 객체 생성
+        let paramData = {itemId: cartAdd.val() , count: count.val() }
+        console.log(paramData)
+        $.ajax({
+          url : "/cart",
+          type : "post"   ,
+          data : paramData ,
+          dataType : "json" , //반환타입
+          success : function (data) {
+            console.log(data)
+            alert(data + "번 아이템 담기 완료되었습니다.")
+
+          },
+          error : function (jqxHR,  status,error) {
+
+            if(jqxHR.status == '401'){
+              alert("로그인후 이용해주세요")
+              location.href = "/user/login" ; //401 로그인 안되어있을때 로그인페이지로
+            }else {
+              console.log(jqxHR.responseText);//에러에 대한 내용 출력
+            }
+
+
+          }
+
+
+
+
+        })
+        
+      }
       function orders() {
         //넘길 객체 생성
         let paramData = {itemId: order.val() , count: count.val() }

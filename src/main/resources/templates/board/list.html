@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+  <h1>목록</h1>
+
+  [[${requestPageDTO.getLink}]]
+  <!--<a th:href="${'/board/list?' + requestPageDTO}"></a>-->
+  <table>
+    <thead>
+      <th>글번호</th>
+      <th>글제목</th>
+      <th>글내용</th>
+      <th>글작성자</th>
+      <th>작성일자</th>
+      <th>수정일자</th>
+    </thead>
+
+    <tbody>
+      <th:block th:each="boardDTO: ${boardDTOList}">
+        <tr>
+          <td th:text="${boardDTO.num}"></td>
+          <td>
+            <a th:href="@{/board/read(num=${boardDTO.num})}">
+              [[${boardDTO.title}]]
+            </a>
+          </td>
+          <td th:text="${boardDTO.content}"></td>
+          <td th:text="${boardDTO.writer}"></td>
+          <td th:text="${#temporals.format(boardDTO.regDate, 'yy/MM/dd HH:mm')}"></td>
+          <td th:text="${#temporals.format(boardDTO.modDate, 'yy/MM/dd HH:mm')}"></td>
+        </tr>
+      </th:block>
+    </tbody>
+  </table>
+
+  <!--
+    페이지 처리 공식
+    end = (int)(Mach.ceil(현재페이지 / 10.0)올림처리) * 10 마지막 번호
+                            7 / 10.0 > 0.7 > 1.0 * 10 = 10.0
+    start = end - 9;
+  -->
+  <th:block th:with="end=${  (T(java.lang.Math).ceil(page / 10.0))*10 < count ?   (   T(java.lang.Math).ceil(page / 10.0))*10  : count   } , start = ${end -9} ">
+
+    <th:block th:if="${start > 1}">
+      <a th:href="@{/board/list(page=1)}"> 처음으로</a>
+    </th:block>
+
+    <th:block th:if="${start > 1}">
+      <a th:href="@{/board/list(page=${#numbers.formatInteger(start-1,0)})}"> 이전</a>
+    </th:block>
+
+    <th:block th:each="page : ${#numbers.sequence(start, end)}">
+      <a th:href="@{/board/list(page=${page})}">[[${page}]]</a>
+    </th:block>
+
+    <th:block th:if="${end < count}">
+      <a th:href="@{/board/list(page=${#numbers.formatInteger(end+1,0)})}"> 다음</a>
+    </th:block>
+
+    <th:block th:if="${end < count}">
+      <a th:href="@{/board/list(page=${count})}"> 끝으로</a>
+    </th:block>
+
+  </th:block>
+
+
+
+</body>
+</html>

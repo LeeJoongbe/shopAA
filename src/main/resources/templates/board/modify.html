@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>수정</h1>
+
+    <form action="/board/modify" method="post" class="formObj" enctype="multipart/form-data">
+        글번호 : <span th:text="${boardDTO.num}"></span><br>
+        제목 : <input name="title" th:value="${boardDTO.title}"><br>
+        내용 : <input name="content" th:value="${boardDTO.content}"><br>
+        <th:block th:each="imgDTO: ${boardDTO.imageDTOList}">
+            <img th:data-num="${imgDTO.num}" th:src="${ '/images/' + imgDTO.imName}">
+            <button type="button" class="delimgbtn" th:value="${imgDTO.num}">삭제</button>
+        </th:block>
+        파일등록 : <input type="file" name="imgFile">
+        작성자 : <span th:text="${boardDTO.writer}"></span><br>
+        등록일자 : <span th:text= "${#temporals.format(boardDTO.regDate, 'yy/MM/dd HH:mm')}"></span><br>
+        수정일자 : <span th:text="${#temporals.format(boardDTO.modDate, 'yy/MM/dd HH:mm')}"></span><br>
+
+        <input name="num" type="hidden" th:value="${boardDTO.num}">
+        <input name="page" th:value="${requestPageDTO.page}" type="hidden">
+        <input name="keyword" th:value="${requestPageDTO.keyword}" type="hidden">
+        <input name="type" th:value="${requestPageDTO.type}" type="hidden">
+
+        <button>저장</button>
+
+        <button type="button" th:value="${boardDTO.num}" class="delbtn">삭제</button>
+    </form>
+
+    <!--
+    이렇게 만들면 너무 이상함
+    <form action="/board/del" method="post">
+        <input name="num" type="hidden" th:value="${boardDTO.num}">
+        <button>삭제</button>
+    </form>
+    -->
+
+    <a href="/board/listA?">목록</a>
+    <a th:href="${'/board/listA?' + requestPageDTO.link}">목록으로이동</a>
+
+    <script th:inline="javascript">
+        let formObj = document.querySelector(".formObj");
+        let delbtn = document.querySelector(".delbtn");
+        let delimgbtn = document.querySelectorAll(".delimgbtn");
+
+        // let num = [[${boardDTO.num}]]
+
+        delbtn.addEventListener("click", function (e){
+            // console.log(num);
+            console.log(e.target.value)
+            console.log(this.value) // 삭제할 번호를 가져온다.
+            formObj.action = "/board/del"
+            // formObj.method = "post"
+            // formObj.innerHTML = "<input name='num' value='" + this.value + "'>"
+            formObj.innerHTML = `<input type="hidden" name="num" value="${this.value}">`
+
+            formObj.submit();
+
+        });
+
+
+        delimgbtn.forEach(a => a.addEventListener("click", function (e) {
+            // console.log(num)
+            // console.log(e.target.value)
+            console.log(this.value)   //삭제할번호를 가져온다.
+            // formObj.method = "post"
+            // formObj.innerHTML = "<input name='num' value='"+  this.value  + "'>"
+            // formObj.innerHTML += `<input type="text" name="delimg" value="${this.value}">`
+            let newInput = document.createElement("input");
+            newInput.type = "hidden";
+            newInput.name = "delimg";
+            newInput.value = this.value;
+
+            formObj.appendChild(newInput)
+            // let aa = document.createElement("h1");
+            // aa.textContent = "하이"
+            // formObj.appendChild(aa);
+            console.log(this)
+            this.style.display = "none";
+            // let num = this.value;
+            // console.log(num)
+
+            let a =  document.querySelector("img[data-num = '"+ this.value +"']")
+            a.style.display = "none"
+            console.log(a)
+
+        }))
+    </script>
+
+
+
+
+
+</body>
+</html>

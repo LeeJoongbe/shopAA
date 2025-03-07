@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout1}"
+>
+<head>
+  <meta charset="UTF-8">
+  <title>장바구니 목록</title>
+</head>
+<body>
+  <th:block layout:fragment="content" >
+
+    <h2 class="mt-5">장바구니 목록</h2>
+
+    <div class="row">
+      <div class="col">
+
+        <table class="table table-hover">
+
+          <colgroup>
+            <col style="width: 15%">
+            <col style="width: 70%">
+            <col style="width: 15%">
+          </colgroup>
+          <thead>
+            <tr>
+              <th >
+                <input id="checkall" type="checkbox">
+                전체선택</th>
+              <th >상품정보</th>
+              <th >상품금액</th>
+            </tr>
+
+          </thead>
+          <tbody>
+
+            <th:block th:each="cartDTO  : ${cartDetailDTOList}">
+
+              <tr>
+                <td class="text-center align-middle">
+                      <input th:value="${cartDTO.cartItemId}" type="checkbox" name="cartChkBox" >
+                </td>
+                <td >
+                  <div class="row">
+                    <div class="col-3">
+                      <img style="width: 100px;" th:src="${'/images/' + cartDTO.imgName}" th:alt="${cartDTO.itemNm}">
+                    </div>
+                    <div class="col">
+                      <div class="row">
+                        <div class="col h4" th:text="${cartDTO.itemNm}"></div>
+                      </div>
+                      <div class="row align-items-center">
+                        <div class="col-auto">
+                          <span th:data-price="${cartDTO.price}" th:id="${'price_' + cartDTO.cartItemId}" th:text="${cartDTO.price}">가격</span>
+                        </div>
+                        <div class="col-auto">
+                          <input type="number" class="form-control count" th:data-cartItemId="${cartDTO.cartItemId}" th:id="${'count_' + cartDTO.cartItemId}"  th:value="${cartDTO.count}">
+                        </div>
+                        <div class="col-auto">
+                          <!--장바구니 삭제버튼 -->
+                          <button type="button" class="btn-close"  th:value="${cartDTO.cartItemId}" aria-label="Close"></button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="align-middle">
+                  <div class="row ">
+                    <div class="col" th:text="${cartDTO.price}" ></div>
+                  </div>
+                </td>
+              </tr>
+            </th:block>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col text-center ">총주문금액 : <span class="orderTotalPrice">0원</span></div>
+    </div>
+
+
+    <div class="row">
+      <div class="col text-center">
+        <button class="btn btn-primary  ordersBtn">주문하기</button>
+      </div>
+    </div>
+
+
+
+  </th:block>
+
+
+  <th:block layout:fragment="script" >
+
+    <script>
+
+
+      $(document).ready(function () {
+        $("input[name=cartChkBox]").on("change", function () {
+          getOrderTotalPrice()
+        })
+        $(".count").on("change", function () {
+          getOrderTotalPrice()
+          //db반영 pk 와 변경된 수량 저장
+          updateCount( $(this) )
+        })
+        $("#checkall").on("change", function () {
+          checkAll()
+        })
+
+        $(".btn-close").on("click", function () {
+          console.log($(this).val())
+          cartItemdel($(this).val())
+        })
+
+        $(".ordersBtn").on("click", function () {
+
+          orders();
+        })
+
+
+        function orders() {
+
+          //주문하기 버튼을 누를때 작동하는 함수
+
+          //1.체크박스로 체크한 pk값 가져오기
+          //2.체크박스로 체크한 pk값 가져와서 보내기 (데이터)
+
+
+          let dataList =  new Array();
+
+          $("input[name=cartChkBox]:checked").each(
+                  function () {
+                    let cartItemId = $(this).val();
+                    console.log(cartItemId)
+                    //현재 장바구니에 담긴 아이템은 여러개이기때문에
+                    // 데이터를 pk값을 배열로 만들어서 보내자\
+                    dataList.push(cartItemId) //[4,3]
+                  }
+          )
+
+
+
+         // {  cartItemIdList : [4,3]  }
+          //3. 보낼주소, 보낼방식
+          $.ajax({
+            url : "/cart/orders",
+            type :  "post" ,
+            data : {cartItemIdList : dataList },
+            success : function () {
+
+              location.href = "/orders"
+
+            } ,
+            error :function (jqXHR , status , error) {
+              if(jqXHR.status == '401') {
+                alert("로그인후 이용해주세요")
+                location.href = "/user/login" ; //401 로그인 안되어있을때 로그인페이지로
+              }else if (jqXHR.status == '403'){
+                alert(jqXHR.responseText);//에러에 대한 내용 출력
+                location.href = "/user/login" ;
+              }else if (jqXHR.status == '400'){
+                if(jqXHR.responseText == '1'){
+                  alert("재고수량이 부족")
+                }else if(jqXHR.responseText == '2'){
+                  alert("상품을 선택해주세요")
+                }
+              }
+            }
+
+
+          })
+
+
+        }
+
+
+        function cartItemdel(cartItemId) {
+
+          // alert(cartItemId)
+          //삭제할 아이템id
+          //주소  /cartItemdel, 방식 delete
+          let paramDate = { cartItemId     : cartItemId   }
+          //
+          $.ajax({
+            url: "/cartItemdel",
+            type: "delete" ,
+            data :  paramDate ,
+            success : function () {
+
+              location.href = "/cart"
+
+            } ,
+            error :function (jqXHR , status , error) {
+
+
+              if(jqXHR.status == '401') {
+                alert("로그인후 이용해주세요")
+                location.href = "/user/login" ; //401 로그인 안되어있을때 로그인페이지로
+              }else if (jqXHR.status == '403'){
+                alert(jqXHR.responseText);//에러에 대한 내용 출력
+                location.href = "/user/login" ;
+              }
+            }
+          })
+
+
+
+        }
+
+
+        function updateCount(target) {
+          let count =target.val();  //수량
+          let cartItemId =target.attr("data-cartItemId") //pk
+
+
+          $.ajax({
+            url : `/cartItem/${cartItemId}/${count}`,
+            type :  "patch",
+            success : function () {
+
+            } ,
+            error :function (jqXHR , status , error) {
+              if(jqXHR.status == '401') {
+                alert("로그인후 이용해주세요")
+                location.href = "/user/login" ; //401 로그인 안되어있을때 로그인페이지로
+              }else if (jqXHR.status == '403'){
+                alert(jqXHR.responseText);//에러에 대한 내용 출력
+                location.href = "/user/login" ;
+              }
+            }
+          })
+
+        }
+        function checkAll() {
+          if($("#checkall").prop("checked")){
+            $("input[name=cartChkBox]").prop("checked", true)
+          }else {
+            $("input[name=cartChkBox]").prop("checked", false)
+          }
+          getOrderTotalPrice()
+        }
+
+        function getOrderTotalPrice() {
+          let orderTotalPrice = 0;
+          $("input[name=cartChkBox]:checked").each(
+                  function () {
+                    let cartItemId = $(this).val();
+                    let price = $("#price_" + cartItemId)
+                    let count = $("#count_" + cartItemId)
+                    let totalPrice = count.val() * price.data("price")
+                    orderTotalPrice += totalPrice;
+                  }
+          )
+          $(".orderTotalPrice").html(orderTotalPrice +'원')
+        }
+      })
+    </script>
+  </th:block>
+
+
+
+</body>
+</html>

@@ -28,4 +28,6 @@ public class ImgDTO {
 
     //참조대상
     private ItemDTO itemDTO;
+
+    private Long bno;
 }

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+
+
+</head>
+<body>
+    <h1>상세보기</h1>
+
+    글번호 : <span th:text="${boardDTO.num}"></span><br>
+    제목 : <span th:text="${boardDTO.title}"></span><br>
+    내용 : <span th:text="${boardDTO.content}"></span><br>
+    <th:block th:each="imgDTO: ${boardDTO.imageDTOList}">
+        <img th:src="${ '/images/' + imgDTO.imgName}">
+    </th:block>
+    작성자 : <span th:text="${boardDTO.writer}"></span><br>
+    등록일자 : <span th:text="${#temporals.format(boardDTO.regDate, 'yy/MM/dd HH:mm')}"></span><br>
+    수정일자 : <span th:text="${#temporals.format(boardDTO.modDate, 'yy/MM/dd HH:mm')}"></span><br>
+
+    <a th:href="${'/board/listA?' + requestPageDTO.link}">목록으로이동</a>
+    <!-- <a href="/board/list">목록</a> -->
+    <a th:href="${'/board/modify?num=' + boardDTO.num + '&' + requestPageDTO.link}">수정으로이동</a>
+    <!-- <a th:href="@{/board/modify(num=${boardDTO.num})}">수정</a> -->
+    <!-- <a th:href="${'/board/modify?num=' + boardDTO.num }" >수정</a> -->
+
+    <div class="row">
+        <div class="col">
+            <form action="/reply/register" method="post" th:object="${requestPageDTO}">
+                댓글내용 :  <input name="replyText"><br>
+                작성자 :  <input name="replyer"><br>
+
+                <input name="num" type="hidden" th:value="${boardDTO.num}">
+                <input name="keyword" type="hidden" th:field="*{keyword}"> <!-- 검색어 -->
+                <input name="type" type="hidden" th:field="*{type}"> <!-- 검색어 -->
+                <input name="page" type="hidden" th:field="*{page}">
+                <button type="submit">댓글등록</button>
+            </form>
+
+            <th:block th:if="${replyDTOResponesPageDTO == null}">
+                <h1>댓글 없음</h1>
+            </th:block>
+            <th:block th:if="${replyDTOResponesPageDTO != null}">
+                <th:block th:each="replyDTO : ${replyDTOResponesPageDTO.dtoList}">
+                    <div class="replytext" th:data-rno="${replyDTO.rno}" th:text="${replyDTO.replyText + '         ' + replyDTO.replyer}"></div>
+                </th:block>
+            </th:block>
+            <!-- 댓글 페이징 처리 -->
+            <th:block th:if="${replyDTOResponesPageDTO.prev}">
+                <a th:href="@{/board/read(page=${requestPageDTO.page} , pageA=${replyDTOResponesPageDTO.start -1} , num=${boardDTO.num}  ) }"> 이전</a>
+            </th:block>
+
+            <th:block th:each="page : ${#numbers.sequence(replyDTOResponesPageDTO.start, replyDTOResponesPageDTO.end)}">
+                <th:block th:if="${replyDTOResponesPageDTO.page == page}">
+                    <a style="color: pink; font-size: 2em" th:href="@{/board/read(page=${requestPageDTO.page} , pageA=${page}  , num=${boardDTO.num})}">[[${page}]]</a>
+                </th:block>
+                <th:block th:if="${replyDTOResponesPageDTO.page != page}">
+                    <a th:href="@{/board/read(page=${requestPageDTO.page}, pageA=${page} , num=${boardDTO.num}  ,  type=${requestPageDTO.type}, keyword=${requestPageDTO.keyword})}">[[${page}]]</a>
+                </th:block>
+            </th:block>
+
+            <th:block th:if="${replyDTOResponesPageDTO.next}">
+                <a th:href="@{/board/read(page=${requestPageDTO.page}  , num=${boardDTO.num} ,pageA=${replyDTOResponesPageDTO.end + 1} ) }"> 다음</a>
+            </th:block>
+        </div>
+        <div class="col shadow ">
+            <div class="row  p-4">
+                <h1>여기는 댓글 restful방식</h1>
+                <div class="col offset-8 ">
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-primary modalregister" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        댓글등록
+                    </button>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel">댓글등록</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+
+                                    <h1 class="ff"></h1>
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control reply_replyText" id="reply_replyText" placeholder="댓글을 작성해주세요">
+                                        <label for="reply_replyText">내용</label>
+
+                                    </div>
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control reply_replyer reply_replyerA" id="reply_replyer" placeholder="이름을 작성해주세요">
+                                        <label for="reply_replyer" class="reply_replyerA">작성자</label>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary reply_registerbtn">Save</button>
+                                    <button type="button" class="btn btn-primary reply_ubtn">Update</button>
+                                    <button type="button" class="btn btn-primary reply_dbtn">Del</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row ">
+                <div class="col reply_list">
+
+
+
+
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+
+
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+
+        let uu = [[${#authentication.principal}]]
+        let bno = [[${boardDTO.num}]]
+        let reply_replyText = $(".reply_replyText")
+        let reply_replyer = $(".reply_replyer")
+        let reply_replyerA = $(".reply_replyerA")
+        let reply_registerbtn = $(".reply_registerbtn")
+        let reply_ubtn = $(".reply_ubtn")
+        let reply_dbtn = $(".reply_dbtn")
+        let modal =  $(".modal")
+        let rno = "";
+        let modalregister = $(".modalregister")
+        let start = ""
+        let end = ""
+
+        let reply_list = $(".reply_list")
+
+        let page = "1";
+
+        showReplyList(page);
+
+        reply_dbtn.on("click", function () {
+
+            $.ajax({
+                url : "/reply/rest/del" ,
+                method : "delete" ,
+                data : {rno : rno} ,
+                success :  function (data) {
+                    alert(data)
+                    modal.modal("hide")
+                    showReplyList(page);
+                },
+                error : function (error) {
+                    console.log(error.responseText)
+                    alert(error.responseText)
+                }
+
+
+            })
+
+        })
+
+        modalregister.on("click", function () {
+            if(uu.username == null) {
+                alert("댓글 등록은 로그인이 필요합니다.")
+                location.href = "/user/login"
+                return false;
+            }
+            reply_ubtn.hide()
+            reply_dbtn.hide()
+            reply_registerbtn.hide()
+            reply_registerbtn.show()
+
+
+            reply_replyText.val("")
+            reply_replyText.show()
+            reply_replyer.val("")
+            reply_replyerA.hide()
+
+        })        
+        
+        
+        
+        reply_ubtn.on("click", function () {
+            let replyDTO = {
+                rno : rno ,
+                replyText : reply_replyText.val()
+
+            }
+            console.log(replyDTO)
+            $.ajax({
+                url : "/reply/rest/update" ,
+                method : "post" ,
+                data : replyDTO ,
+                success : function (data) {
+
+                    modal.modal("hide")  //display = none
+                    showReplyList(page);
+                } ,
+                error : function (error) {
+                    alert("수정이 실패 했습니다.다시 확인해주세요")
+                    console.log(error.responseText)
+                    console.log(error.status)
+                }
+            })
+        })
+
+
+
+        reply_list.on("click", "A" , function (e) {
+
+
+            e.preventDefault()
+            console.log($(this).text())
+            if($(this).text() == 'Next') {
+                showReplyList(end+1)
+            } else if ($(this).text() =='Previous' ) {
+                showReplyList(start-1)
+            } else {
+                showReplyList($(this).text())
+            }
+
+
+
+        })
+
+        reply_list.on("click", ".update" ,  function () {
+
+            if(uu.username != $(this).data("email")) {
+                return false;
+            }
+
+            console.log($(this).data("rno"))
+            //모달창 켜기
+            rno= $(this).data("rno")
+
+            reply_ubtn.hide()
+            reply_dbtn.hide()
+            reply_registerbtn.hide()
+
+            reply_ubtn.show()
+            reply_dbtn.show()
+
+
+            reply_replyText.val("")
+            reply_replyText.show()
+
+            read(rno);
+            //모달창에 넣어주자
+
+            // $.ajax({
+            //     url : "/reply/rest/update",
+            //     data : ,
+            //     method : "post",
+            //     success : ,
+            //     error :
+            // })
+
+        })
+
+        
+        //무슨버튼을 클릭했을때
+        reply_registerbtn.on("click", function () {
+
+
+
+            //js 객체형태 보낼때
+            //@requestbody는 post , json형태로 변환 "키" 객체의 키값에 큰따옴표
+            //post라도 그냥보내면
+            let replyDTO = { replyText : reply_replyText.val() ,
+                replyer : reply_replyer.val() ,
+                num : bno
+            }
+            console.log(replyDTO)
+
+            $.ajax({
+                url : "/reply/rest/register" ,
+                method : "post" ,
+                data : replyDTO ,
+                success : function (data) {
+                    alert(data)
+                    reply_replyText.val("")
+                    reply_replyer.val("")
+                    modal.modal("hide")  //display = none
+                    showReplyList(page);
+                } ,
+                error : function (error) {
+                    alert("저장이 실패 했습니다.다시 확인해주세요")
+
+
+                    if(error.status == 400  ){
+                        console.log(error.responseText)
+
+                        for (let i = 0; i < JSON.parse(error.responseText).length; i++) {
+                            console.log(JSON.parse(error.responseText))
+                            console.log(JSON.parse(error.responseText)[i].field)
+                            console.log(JSON.parse(error.responseText)[i].defaultMessage)
+                            if(JSON.parse(error.responseText)[i].field == 'replyText') {
+                                alert("내용" + JSON.parse(error.responseText)[i].defaultMessage)
+                                $(".ff").text(JSON.parse(error.responseText)[i].defaultMessage)
+
+                                //댓글입력칸에 포커스
+                            }
+                        }
+                    }
+                    if(error.status == 500 ){
+                        console.log(error.responseText)
+                        alert(error.responseText)
+                    }
+
+                    console.log(error.status)
+                }
+            })
+
+
+
+        })
+
+
+        //댓글 읽기
+        function read(rno) {
+
+            $.ajax({
+                url : "/reply/rest/read/"+rno,
+
+                success: function (data) {
+                    console.log("읽기로 넘어온 데이터")
+                    console.log(data)
+                    reply_replyText.val(data.replyText)
+                    reply_replyerA.hide()
+
+                    modal.modal("show")
+
+                },
+                error : function (error) {
+                    if(error.status == 400) {
+                        alert(error.responseText)
+                    }
+
+                }
+            })
+
+        }
+
+
+        //댓글 목록
+        //댓글 목록 가져오기 : 등록후에 실행하고, 처음 들어왔을때 실행하고, 수정하고 실행하고 삭제하고 실행
+        function showReplyList(page) {
+            let strA = ""
+            let pagination = "";
+            $.ajax({
+                url: "/reply/rest/list" ,
+                method: "get" ,
+                data : { num : bno , page:  page} ,
+                success : function (data) {
+                    console.log(data)
+                    page = data.page
+                    for (let i = 0; i< data.dtoList.length; i++){
+                        //console.log(data.dtoList[i])
+
+                        strA += ` <div class="row">
+                                    <div class="col-2">${data.dtoList[i].rno}</div>
+                                    <div class="col-4 update" data-email="${data.dtoList[i].membersDTO.email}" data-rno="${data.dtoList[i].rno}">${data.dtoList[i].replyText}</div>
+                                    <div class="col-2">${data.dtoList[i].membersDTO.name}</div>
+                                    <div class="col-4">${dateFormat(new Date(data.dtoList[i].regDate))}</div>
+                                </div>`
+
+
+
+                    }
+
+                    //페이징처리
+                    pagination += `<div class="row mt-4">
+                                        <div class="col">
+                                        <nav aria-label="Page navigation example ">
+                        <ul class="pagination justify-content-center">`;
+
+                    //이전페이지
+                    if( data.prev  ){
+                        pagination += ` <li class="page-item ">
+                                <a class="page-link">Previous</a>
+                            </li>`
+                    } else {
+                        pagination += ` <li class="page-item disabled">
+                                <a class="page-link">Previous</a>
+                            </li>`
+                    }
+                    start=data.start
+                    end = data.end
+                    //페이지
+                    for(let start=data.start , end = data.end;  start <= end ; start++)
+                    {
+                        pagination += `<li class="page-item">
+                                            <a class="page-link" href="#">${start}</a>
+                                       </li>`
+                    }
+                    //다음페이지
+                    if(data.next) {
+                        pagination += `<li class="page-item">
+                                            <a class="page-link" href="#">Next</a>
+                                        </li>`
+                    } else{
+                        pagination += `<li class="page-item disabled">
+                                            <a class="page-link" href="#">Next</a>
+                                        </li>`
+                    }
+
+                    pagination += `</div></div></ul></nav>`
+
+
+
+                    $(".reply_list").html(strA)
+                    $(".reply_list").append(pagination)
+                },
+                error : function () {
+                    
+                }
+
+            })
+//수정
+
+
+        }
+        function dateFormat(date) {
+            let dateFormat2 = date.getFullYear() +
+                '-' + ( (date.getMonth()+1) < 9 ? "0" + (date.getMonth()+1) : (date.getMonth()+1) )+
+                '-' + ( (date.getDate()) < 9 ? "0" + (date.getDate()) : (date.getDate()) );
+            return dateFormat2;
+        }
+
+    </script>
+
+
+<script th:inline="javascript">
+    //댓글을 클릭했을때 사용하려는 댓글들
+    let replytext = document.querySelectorAll(".replytext");
+    //수정할때 기존에 만들어 놓은 form태그를 이용해서 사용
+    let formobj = document.querySelector("form");
+    //댓글의 내용 입력태그
+    let replyText = document.querySelector("input[name='replyText']")
+    //댓글의 작성자 입력태그
+    let replyer = document.querySelector("input[name='replyer']")
+
+    console.log(replytext)
+    //댓글들을 클릭했을때
+    replytext.forEach(btn => btn.addEventListener("click", function () {
+        //innerHTML로 작성시 html을 새로 작성해서 기존에 달린
+        // 이벤트가 제거 됨으로 유지하기 위해서 element를 새로 만들서 추가하는 방식
+
+        //수정할 내용의 pk번호
+        let  rno = document.createElement("input");
+        rno.type = "hidden";
+        rno.value = this.dataset.rno
+        rno.name =  "rno"       //컨트롤러에서 데이터를 수집하기위해서
+                                //name 설정
+
+
+        //내용을 수정할 input태그
+        let  newInput = document.createElement("input");
+        newInput.type = "text";
+        // newInput.value = "내용"
+        // newInput.name = "replyText";
+        //작성자를 수정할 input태그
+        // let  newInput1 = document.createElement("input");
+        // newInput1.type = "text";
+        // newInput1.value = "작성자"
+        // newInput.name = "replyer";
+        // 사용자에게 저장을 하는것처럼 만들기위해 이벤트를 추가한 저장버튼
+        let  updatebtn = document.createElement("button");
+        updatebtn.textContent = '저장';
+
+        //삭제버튼
+        let  delbtn = document.createElement("button");
+        delbtn.textContent = '삭제';
+
+
+        this.after(rno)
+        this.after(delbtn)
+        this.after(updatebtn)
+
+        // this.after(newInput1)
+        this.after(newInput)
+        delbtn.addEventListener("click", function () {
+
+            formobj.appendChild(rno)
+
+            formobj.action = "/reply/del"
+            console.log(formobj)
+            formobj.submit()
+        })
+
+
+        updatebtn.addEventListener("click", function () {
+
+            replyText.value =newInput.value
+            // replyer.value =newInput1.value
+            formobj.appendChild(rno)
+
+            formobj.action = "/reply/update"
+            console.log(formobj)
+            formobj.submit()
+        })
+        
+    }))
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+
+</body>
+</html>

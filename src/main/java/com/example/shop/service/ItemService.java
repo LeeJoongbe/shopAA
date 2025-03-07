@@ -49,12 +49,12 @@ public class ItemService {
         item = itemRepository.save(item);
         String repimgYn = null;
 
-        imgService.register(main, item.getId(), "Y");
+        imgService.register(main, "item", item.getId(), "Y");
 
 
         if(multipartFiles!= null){
             for(int i = 0; i < multipartFiles.length;  i++){
-                imgService.register(multipartFiles[i], item.getId(), repimgYn);
+                imgService.register(multipartFiles[i], "item", item.getId(), repimgYn);
             }
         }
 
@@ -157,7 +157,7 @@ public class ItemService {
         log.info(item);
 
         List<ImgDTO> imgDTOList =
-        imgService.read(item_id);
+        imgService.read(item_id, "item");
 
         ItemDTO itemDTO =
                 modelMapper.map(item, ItemDTO.class);
@@ -190,13 +190,13 @@ public class ItemService {
 
         //대표이미지
         if( mainimg !=null && !mainimg.isEmpty()){
-            imgService.register(mainimg, item.getId(), "Y");
+            imgService.register(mainimg, "item", item.getId(), "Y");
         }
 
         //상세이미지
         if(multipartFile != null){
             for(int i = 0; i < multipartFile.length;  i++){
-                imgService.register(multipartFile[i], item.getId(), repimgYn);
+                imgService.register(multipartFile[i], "item" ,item.getId(), repimgYn);
             }
         }
 
@@ -208,7 +208,7 @@ public class ItemService {
     public void del(Long item_id){
 
         List<ImgDTO> imgDTOList =
-        imgService.read(item_id);
+        imgService.read(item_id , "item");
 
         //pk를 던져야한다.
         for(ImgDTO imgDTO  : imgDTOList) {
